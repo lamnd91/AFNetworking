@@ -1,4 +1,4 @@
-// UIWebView+AFNetworking.m
+// WKWebView+AFNetworking.m
 // Copyright (c) 2011–2015 Alamofire Software Foundation (http://alamofire.org/)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,7 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-#import "UIWebView+AFNetworking.h"
+#import "WKWebView+AFNetworking.h"
 
 #import <objc/runtime.h>
 
@@ -29,11 +29,11 @@
 #import "AFURLResponseSerialization.h"
 #import "AFURLRequestSerialization.h"
 
-@interface UIWebView (_AFNetworking)
+@interface WKWebView (_AFNetworking)
 @property (readwrite, nonatomic, strong, setter = af_setHTTPRequestOperation:) AFHTTPRequestOperation *af_HTTPRequestOperation;
 @end
 
-@implementation UIWebView (_AFNetworking)
+@implementation WKWebView (_AFNetworking)
 
 - (AFHTTPRequestOperation *)af_HTTPRequestOperation {
     return (AFHTTPRequestOperation *)objc_getAssociatedObject(self, @selector(af_HTTPRequestOperation));
@@ -47,7 +47,7 @@
 
 #pragma mark -
 
-@implementation UIWebView (AFNetworking)
+@implementation WKWebView (AFNetworking)
 
 - (AFHTTPRequestSerializer <AFURLRequestSerialization> *)requestSerializer {
     static AFHTTPRequestSerializer <AFURLRequestSerialization> *_af_defaultRequestSerializer = nil;
@@ -134,11 +134,9 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wgnu"
         __strong __typeof(weakSelf) strongSelf = weakSelf;
-        [strongSelf loadData:data MIMEType:(MIMEType ?: [operation.response MIMEType]) textEncodingName:(textEncodingName ?: [operation.response textEncodingName]) baseURL:[operation.response URL]];
-
-        if ([strongSelf.delegate respondsToSelector:@selector(webViewDidFinishLoad:)]) {
-            [strongSelf.delegate webViewDidFinishLoad:strongSelf];
-        }
+        [strongSelf loadData:data MIMEType:(MIMEType ?: [operation.response MIMEType]) characterEncodingName:(textEncodingName ?: [operation.response textEncodingName]) baseURL:[operation.response URL]];
+        
+        [strongSelf.navigationDelegate webView:strongSelf didFinishNavigation:nil];
 
 #pragma clang diagnostic pop
     } failure:^(AFHTTPRequestOperation * __unused operation, NSError *error) {
@@ -149,9 +147,7 @@
 
     [self.af_HTTPRequestOperation start];
 
-    if ([self.delegate respondsToSelector:@selector(webViewDidStartLoad:)]) {
-        [self.delegate webViewDidStartLoad:self];
-    }
+    [self.navigationDelegate webView:self didStartProvisionalNavigation:nil];
 }
 
 @end
